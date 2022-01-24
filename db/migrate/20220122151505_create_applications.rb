@@ -4,6 +4,7 @@ class CreateApplications < ActiveRecord::Migration[5.2]
       t.string :name
       t.string :token
       t.integer :chats_count
+      t.integer :chats_created
 
       t.timestamps
     end
