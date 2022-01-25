@@ -25,4 +25,5 @@ services:
       DB_NAME: Chat_System_development
       DB_PASSWORD: 12345678
       DB_HOST: db
+      TokenSecret: 123456
       

@@ -19,12 +19,15 @@ module Api
         end
 
         def create
-            user = User.new(user_params)
-            if user.save
-                render json: {user: user.attributes.except('id')}
-            else
-                render json: {message: 'Internal Server Error'}
-            end
+          if username_exist(params[:username])
+            return render json:{message: 'Username is already exist'}
+          end
+          user = User.new(user_params)
+          if user.save
+              render json: {user: user.attributes.except('id')}
+          else
+              render json: {message: 'Internal Server Error'}
+          end
         end
 
         def destroy
@@ -37,8 +40,11 @@ module Api
         end
 
         def update
+          if username_exist(params[:new_username])
+            return render json:{message: 'Username is already exist'}
+          end
           user = User.find_by(username: params[:id])
-          if user.update({username: params[:username]})
+          if user.update({username: params[:new_username]})
             render json:{message: 'User Updated Successfully'}
           else
             render json:{message: 'Failed to update user'}
@@ -46,11 +52,10 @@ module Api
         end
 
         def login
-            user = User.find_by(name: params[:name])
+            user = User.find_by(username: params[:username])
 
             if user && user.authenticate(params[:password])
                 Current.user = user
-                # p Current.user
                 token = encode_token({user_id: user.id})
                 render json: {user: user.attributes.except('id'), token: token}
             else
@@ -68,6 +73,10 @@ module Api
 
         def user_params
             params.permit(:username, :password)
+        end
+
+        def username_exist(username)
+          user = User.find_by(username: username)
         end
 
     end

@@ -5,8 +5,9 @@ module Api
       if application_decoded_token
         application = Application.find_by(name: application_decoded_token[0]['name'])
         chat = Chat.find_by(number: params[:chat_no], application_id: application.id)
-        messages = Message.find_by({chat_id: chat.id})
-        render json:{messages: messages.except('id')}
+        messages = Message.where({chat_id: chat.id})
+        messages = messages.map {|message| message.attributes.except('id')}
+        render json:{messages: messages}
       end
     end
 
@@ -28,7 +29,7 @@ module Api
             application = Application.find_by(name: application_decoded_token[0]['name'])
             chat = Chat.find_by(number: params[:chat_no], application_id: application.id)
             message = chat.messages.new(message_params)
-            message.sender_id = 1
+            message.sender_id = params[:user].id
             message.number = chat.messages_created + 1
             if message.save
                 render json:{number: message.number}
@@ -70,7 +71,7 @@ module Api
     end
 
     def application_decoded_token
-        token = params[:token]
+        token = params[:app_token]
         token = token.gsub("-", ".")
         begin
             JWT.decode(token, 'yourSecret', true, algorithm: 'HS256')
