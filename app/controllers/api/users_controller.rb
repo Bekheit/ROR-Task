@@ -10,7 +10,7 @@ module Api
         end
 
         def show
-            user = User.find_by(username: params[:id])
+            user = User.find_by(username: params[:username])
             if user
               render json:{user: user}
             else
@@ -26,28 +26,34 @@ module Api
           if user.save
               render json: {user: user.attributes.except('id')}
           else
-              render json: {message: 'Internal Server Error'}
+              render json: {message: user.errors}
           end
         end
 
         def destroy
-            user = User.find_by(username: params[:id])
+          if !username_exist(params[:username])
+            return render json:{message: 'Username does not exist'}
+          end
+            user = User.find_by(username: params[:username])
             if user.destroy
               render json:{message: 'User Deleted'}
             else
-              render json:{message: 'Failed To Delete User'}
+              render json:{message: user.errors}
             end
         end
 
         def update
-          if username_exist(params[:new_username])
+          
+          if !username_exist(params[:username])
+            return render json:{message: 'Username does not exist'}
+          elsif username_exist(params[:new_username])
             return render json:{message: 'Username is already exist'}
           end
-          user = User.find_by(username: params[:id])
+          user = User.find_by(username: params[:username])
           if user.update({username: params[:new_username]})
             render json:{message: 'User Updated Successfully'}
           else
-            render json:{message: 'Failed to update user'}
+            render json:{message: user.errors}
           end
         end
 
@@ -55,7 +61,6 @@ module Api
             user = User.find_by(username: params[:username])
 
             if user && user.authenticate(params[:password])
-                Current.user = user
                 token = encode_token({user_id: user.id})
                 render json: {user: user.attributes.except('id'), token: token}
             else

@@ -37,7 +37,7 @@ module Api
 
         def update
           application = Application.find_by(name: params[:id])
-          if application.update({name: params[:name]})
+          if application.update({name: params[:name], token: encode_token({name: params[:name]})})
             render json:{message: 'Application Updated Successfully'}
           elsif 
             render json:{message: 'Failed to update application'}

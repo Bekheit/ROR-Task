@@ -3,6 +3,8 @@ class Message < ApplicationRecord
     # include Elasticsearch::Model
     # include Elasticsearch::Model::Callbacks
     has_one :chat
+    validates :receiver_id, :presence => true
+    validates :content, :presence => true
 
     # settings analysis: {
     # ​​    tokenizer: {
